@@ -3,7 +3,8 @@ const uploadInput = document.getElementById("upload-input");
 const viewModal = new bootstrap.Modal(document.getElementById('view-modal'))
 const viewModalBtn = document.querySelectorAll('.play-btn');
 const viewModalIFrame = document.getElementById('video-frame');
-
+const loading = document.getElementById('loader');
+const content = document.getElementById('content');
 const REMOVED_VIDEO_TITLES = ["Watched a video that has been removed", "Visited YouTube Music"];
 
 /**
@@ -52,22 +53,26 @@ async function handleSelectFile(event) {
  * @returns {Promise<void>}
  */
 async function processData(data) {
+    loading.classList.remove('d-none');
+    content.classList.add('d-none');
     let videosMap = new Map();
     let channelsMap = new Map();
     // Processing videos list
     data.forEach(video => {
         const title = video.title;
-        if (!REMOVED_VIDEO_TITLES.includes(title)) {
-            if (videosMap.has(title)) {
-                const videoObj = videosMap.get(title);
+        if (!REMOVED_VIDEO_TITLES.includes(title) && new Date(video.time).getUTCFullYear() >= 2022) {
+            const id = YoutubeAPI.getIdFromURL(video.titleUrl);
+            if (videosMap.has(id)) {
+                const videoObj = videosMap.get(id);
                 videoObj.viewsCount++;
                 videoObj.logs.push(video)
             } else {
                 try {
-                    videosMap.set(title, {
-                        title: title,
+                    videosMap.set(id, {
+                        title: title.replace(/^Watched /, ''),
                         viewsCount: 1,
-                        id: YoutubeAPI.getIdFromURL(video.titleUrl),
+                        id: id,
+                        url: video.titleUrl,
                         logs: [video]
                     })
                 } catch (e) {
@@ -76,10 +81,14 @@ async function processData(data) {
             }
         }
     });
+
+    //
     // Sorting
     const sortedVideosList = Array.from(videosMap.values()).sort((v1, v2) => v2.viewsCount - v1.viewsCount)
+    console.log(videosMap)
+    console.log(sortedVideosList);
     //console.table(sortedVideosList);
-    const topFiveHundred = sortedVideosList.slice(0, 500);
+    let topFiveHundred = sortedVideosList.slice(0, 500);
     const topFiveHundredSeparated = [
         sortedVideosList.slice(0, 50),
         sortedVideosList.slice(50, 100),
@@ -106,9 +115,10 @@ async function processData(data) {
         ...topFiveHundredProcessed[9],
     ];
     topFiveHundredProcessedMerged.forEach((videoStats, index) => {
-        topFiveHundred[index].fromYoutubeAPI = videoStats;
+        videosMap.get(videoStats.id).fromYoutubeAPI = videoStats;
     })
-    console.log(topFiveHundred)
+    topFiveHundred = topFiveHundred.filter(e => e.fromYoutubeAPI !== undefined)
+
     topFiveHundred.forEach(video => {
         try {
             const channel = video.fromYoutubeAPI.channelTitle;
@@ -132,42 +142,47 @@ async function processData(data) {
 
     });
     console.log(channelsMap)
-    return;
-    const topHundredProcessed = await Promise.all([
-        YoutubeAPI.getVideosMetadata(topHundredSeparated[0].map(video => video.id)), YoutubeAPI.getVideosMetadata(topHundredSeparated[1].map(video => video.id))]);
-    const topHundredProcessedMerged = [...topHundredProcessed[0], ...topHundredProcessed[1]]
-    console.log(topHundredProcessedMerged)
-    topHundredProcessedMerged.forEach((videoStats, index) => {
-        topHundred[index].fromYoutubeAPI = videoStats;
-    })
 
-    topHundred.slice(0, 5).forEach((video, index) => {
+    // TOP FIVE
+    topFiveHundred.slice(0, 5).forEach((video, index) => {
         updateVideoCard('top-' + (index + 1), video)
     })
-
-    topHundred.forEach(video => {
-        const channel = video.fromYoutubeAPI.channelTitle;
-        if (channelsMap.has(channel)) {
-            const channelObj = channelsMap.get(channel);
-            channelObj.viewsCount += video.viewsCount;
-            channelObj.videos.push(video)
-        } else {
-            try {
-                channelsMap.set(channel, {
-                    channelTitle: channel,
-                    viewsCount: video.viewsCount,
-                    url: video.fromYoutubeAPI.channelURL,
-                    videos: [video]
-                })
-            } catch (e) {
-                console.error(e, video)
-            }
-        }
-
-    });
-    console.log(channelsMap)
-
-    //console.log("You have watched", data.length, "videos")
+    // TOP 500 VIDEOS
+    topFiveHundred.slice(0,100).forEach((video, index) => {
+        document.getElementById('top-500-videos').innerHTML += `
+        <tr>
+                        <th scope="row">${index + 1}</th>
+                        <td><a href="${video.url}" target="_blank">${video.title}</a></td>
+                        <td>${video.viewsCount}</td>
+                        <td>${video.fromYoutubeAPI.channelTitle}</td>
+                    </tr>`
+    })
+    // TOP 100 CHANNELS
+    const sortedChannelsList = Array.from(channelsMap.values()).sort((c1, c2) => c2.viewsCount - c1.viewsCount);
+    console.log(sortedChannelsList)
+    sortedChannelsList.slice(0, 20).forEach((channel, index) => {
+        document.getElementById('top-500-channels').innerHTML += `
+        <tr>
+            <th scope="row">${index + 1}</th>
+            <td><a href="${channel.url}" target="_blank">${channel.channelTitle}</a></td>
+            <td>${channel.videos.length}</td>
+            <td>${channel.viewsCount}</td>
+            <td>
+                <p>
+                  <a class="btn btn-primary" data-bs-toggle="collapse" href="#channel-${index}" role="button" aria-expanded="false" aria-controls="collapseExample">
+                    View videos list
+                  </a>
+                </p>
+                <div class="collapse" id="channel-${index}">
+                  <div class="card card-body">
+                    ${channel.videos.map(video=>video.title).join('<br>')}
+                  </div>
+                </div>
+            </td>
+        </tr>`
+    })
+    loading.classList.add('d-none');
+    content.classList.remove('d-none');
 }
 
 function updateVideoCard(cardID, videoData) {

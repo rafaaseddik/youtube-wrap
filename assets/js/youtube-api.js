@@ -5,6 +5,7 @@ class YoutubeAPI{
      *
      * @param {string[]} videosIDs
      * @returns {Promise<[{
+     *  id:string,
      *  channelTitle:string,
      *  channelURL:string,
      *  watchCount:number,
@@ -17,6 +18,7 @@ class YoutubeAPI{
         return resultJSON.items.map(videoItem=>{
             try{
                 return {
+                    id:videoItem.id,
                     channelTitle:videoItem.snippet.channelTitle,
                     channelURL:"https://youtube.com/channel/"+videoItem.snippet.channelId,
                     watchCount:videoItem.statistics.viewCount,

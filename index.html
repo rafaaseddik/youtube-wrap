@@ -37,9 +37,8 @@
                 <li>
                     <a href="#" class="nav-link px-2 text-secondary">Home</a>
                 </li>
-                <li><a href="#" class="nav-link px-2 text-white">Guide</a></li>
+                <li><a href="./guide.html" class="nav-link px-2 text-white">Guide</a></li>
 
-                <li><a href="#" class="nav-link px-2 text-white">About</a></li>
             </ul>
         </div>
     </div>
@@ -61,19 +60,23 @@
                             id="upload-btn"
                             class="btn btn-outline-info btn-lg px-4 me-sm-3 fw-bold"
                     >
-                        Upload Youtube watch history (*.json)
+                        Upload YouTube watch history (*.json)
                     </button>
                     <input type="file" id="upload-input" class="d-none"/>
-                    <button type="button" class="btn btn-outline-light btn-lg px-4">
+                    <a href="guide.html"><button type="button" class="btn btn-outline-light btn-lg px-4">
                         Google Takeout Guide
-                    </button>
+                    </button></a>
                 </div>
             </div>
         </div>
     </div>
 </main>
 
-
+<div class="container text-center py-5 d-none" id="loader">
+    <h2>Loading</h2>
+    <div class="lds-dual-ring"></div>
+</div>
+<div id="content" class="d-none">
 <div class="album py-5 bg-light">
     <div class="container">
         <div class="row">
@@ -96,8 +99,6 @@
                     </div>
                 </div>
             </div>
-
-
 
 
             <div class="col" id="top-2">
@@ -154,7 +155,8 @@
 
                     <div class="card-body">
                         <h5 class="card-title video-title">Title</h5>
-                        <p class="card-text">Channel : <a href="google.com" target="_blank" class="channel-name">Channel name</a></p>
+                        <p class="card-text">Channel : <a href="google.com" target="_blank" class="channel-name">Channel
+                            name</a></p>
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="btn-group">
                                 <button type="button" class="btn btn-sm btn-outline-secondary play-btn">Play</button>
@@ -164,7 +166,6 @@
                     </div>
                 </div>
             </div>
-
 
 
         </div>
@@ -184,26 +185,10 @@
                         <th scope="col">Channel</th>
                         <th scope="col">Number of watched videos</th>
                         <th scope="col">Total views</th>
+                        <th scope="col">Videos list</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    <tr>
-                        <th scope="row">1</th>
-                        <td>Mark</td>
-                        <td>Otto</td>
-                        <td>@mdo</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">2</th>
-                        <td>Jacob</td>
-                        <td>Thornton</td>
-                        <td>@fat</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">3</th>
-                        <td colspan="2">Larry the Bird</td>
-                        <td>@twitter</td>
-                    </tr>
+                    <tbody id="top-500-channels">
                     </tbody>
                 </table>
             </div>
@@ -216,8 +201,8 @@
             <div class="col text-center mb-5"><h1 class="display-4 fw-bold">Your TOP 100 Videos</h1></div>
         </div>
         <div class="row">
-            <div class="col text-center mb-5">
-                <table class="table">
+            <div class="col mb-5">
+                <table class="table text-left">
                     <thead>
                     <tr>
                         <th scope="col">#</th>
@@ -226,41 +211,26 @@
                         <th scope="col">Channel</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    <tr>
-                        <th scope="row">1</th>
-                        <td>Mark</td>
-                        <td>Otto</td>
-                        <td>@mdo</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">2</th>
-                        <td>Jacob</td>
-                        <td>Thornton</td>
-                        <td>@fat</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">3</th>
-                        <td colspan="2">Larry the Bird</td>
-                        <td>@twitter</td>
-                    </tr>
+                    <tbody id="top-500-videos">
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
-<div class="modal fade"  id="view-modal">
+<div class="modal fade" id="view-modal">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-body text-center">
-                <iframe width="560" id="video-frame" height="315" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <iframe width="560" id="video-frame" height="315" src="" title="YouTube video player" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen></iframe>
             </div>
         </div>
 
     </div>
 </div>
-
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="./assets/js/youtube-api.js"></script>
