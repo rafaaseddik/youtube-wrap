@@ -60,7 +60,7 @@ async function processData(data) {
     // Processing videos list
     data.forEach(video => {
         const title = video.title;
-        if (!REMOVED_VIDEO_TITLES.includes(title) && new Date(video.time).getUTCFullYear() >= 2023) {
+        if (!REMOVED_VIDEO_TITLES.includes(title) && new Date(video.time).getUTCFullYear() === 2023) {
             const id = YoutubeAPI.getIdFromURL(video.titleUrl);
             if (videosMap.has(id)) {
                 const videoObj = videosMap.get(id);
