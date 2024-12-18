@@ -58,29 +58,31 @@ async function processData(data) {
     let videosMap = new Map();
     let channelsMap = new Map();
     // Processing videos list
-    data.forEach(video => {
-        const title = video.title;
-        if (!REMOVED_VIDEO_TITLES.includes(title) && new Date(video.time).getUTCFullYear() === 2024) {
-            const id = YoutubeAPI.getIdFromURL(video.titleUrl);
-            if (videosMap.has(id)) {
-                const videoObj = videosMap.get(id);
-                videoObj.viewsCount++;
-                videoObj.logs.push(video)
-            } else {
-                try {
-                    videosMap.set(id, {
-                        title: title.replace(/^Watched /, ''),
-                        viewsCount: 1,
-                        id: id,
-                        url: video.titleUrl,
-                        logs: [video]
-                    })
-                } catch (e) {
-                    console.error(e, video)
+    data
+        .filter(video => video.titleUrl && video.titleUrl.includes("\u003d"))
+        .forEach(video => {
+            const title = video.title;
+            if (!REMOVED_VIDEO_TITLES.includes(title) && new Date(video.time).getUTCFullYear() === 2024) {
+                const id = YoutubeAPI.getIdFromURL(video.titleUrl);
+                if (videosMap.has(id)) {
+                    const videoObj = videosMap.get(id);
+                    videoObj.viewsCount++;
+                    videoObj.logs.push(video)
+                } else {
+                    try {
+                        videosMap.set(id, {
+                            title: title.replace(/^Watched /, ''),
+                            viewsCount: 1,
+                            id: id,
+                            url: video.titleUrl,
+                            logs: [video]
+                        })
+                    } catch (e) {
+                        console.error(e, video)
+                    }
                 }
             }
-        }
-    });
+        });
 
     //
     // Sorting
@@ -148,7 +150,7 @@ async function processData(data) {
         updateVideoCard('top-' + (index + 1), video)
     })
     // TOP 500 VIDEOS
-    topFiveHundred.slice(0,100).forEach((video, index) => {
+    topFiveHundred.slice(0, 100).forEach((video, index) => {
         document.getElementById('top-500-videos').innerHTML += `
         <tr>
                         <th scope="row">${index + 1}</th>
@@ -175,7 +177,7 @@ async function processData(data) {
                 </p>
                 <div class="collapse" id="channel-${index}">
                   <div class="card card-body">
-                    ${channel.videos.map(video=>video.title).join('<br>')}
+                    ${channel.videos.map(video => video.title).join('<br>')}
                   </div>
                 </div>
             </td>
